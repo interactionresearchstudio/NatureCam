@@ -1,3 +1,8 @@
 {
-    "camera_warmup": 2.5
+    "camera_warmup": 2.5,
+    "delta_threshold": 5,
+    "min_width": 20,
+    "max_width": 200,
+    "min_height": 20,
+    "max_height": 200
 }
