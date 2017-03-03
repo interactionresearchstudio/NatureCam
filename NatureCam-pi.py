@@ -81,7 +81,11 @@ def detectChangeContours(img):
     if avg is None:
         avg = gray.copy().astype("float")
         # remember to truncate capture for Pi
-        return img
+        rawCapture.truncate(0)
+        if config["rotate_display"] == 1:
+            return rotateImage(img)
+        else:
+            return img
     
     # add to accumulation model and find the change
     cv2.accumulateWeighted(gray, avg, 0.5)
@@ -105,7 +109,10 @@ def detectChangeContours(img):
         
     # if the contour is too small, just return the image.
     if w > maxWidth or w < minWidth or h > maxHeight or h < minHeight:
-        return img
+        if config["rotate_display"] == 1:
+            return rotateImage(img)
+        else:
+            return img
 
     # otherwise, draw the rectangle
     if time.time() - lastPhotoTime > config['min_photo_interval_s']:
@@ -116,10 +123,11 @@ def detectChangeContours(img):
         numOfPhotos = numOfPhotos + 1
         lastPhotoTime = time.time()
 
+    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0,255), 2)
+
     if config["rotate_display"] == 1:
         img = rotateImage(img)
 
-    cv2.rectangle(img, (x,y), (x+w, y+h), (0,0,255), 2)
     cv2.putText(img, "%d" % numOfPhotos, (10,20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 2)
 
     return img
