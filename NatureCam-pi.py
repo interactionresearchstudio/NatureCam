@@ -46,6 +46,7 @@ avg = None
 mode = 0
 
 lastPhotoTime = 0
+numOfPhotos = 0
 
 minWidth = config["min_width"]
 maxWidth = config["max_width"]
@@ -65,6 +66,7 @@ def takePhoto(image):
 def detectChangeContours(img):
     global avg
     global lastPhotoTime
+    global numOfPhotos
 
     # convert to gray
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -99,9 +101,11 @@ def detectChangeContours(img):
     # otherwise, draw the rectangle
     if time.time() - lastPhotoTime > config['min_photo_interval_s']:
         takePhoto(img)
+        numOfPhotos = numOfPhotos + 1
         lastPhotoTime = time.time()
 
     cv2.rectangle(img, (x,y), (x+w, y+h), (0,0,255), 2)
+    cv2.putText(img, "%d" % numOfPhotos, (10,20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 2)
 
     return img
 
