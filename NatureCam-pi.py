@@ -106,14 +106,20 @@ def detectChangeContours(img):
 
     # otherwise, draw the rectangle
     if time.time() - lastPhotoTime > config['min_photo_interval_s']:
-        takePhoto(rotateImage(img))
+        if config["rotate_saved"] == 1:
+            takePhoto(rotateImage(img))
+        else:
+            takePhoto(img)
         numOfPhotos = numOfPhotos + 1
         lastPhotoTime = time.time()
 
     cv2.rectangle(img, (x,y), (x+w, y+h), (0,0,255), 2)
     cv2.putText(img, "%d" % numOfPhotos, (10,20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 2)
 
-    return rotateImage(img)
+    if config["rotate_display"] == 1:
+        return rotateImage(img)
+    else:
+        return img
 
 def getLargestContour(contours):
     if not contours:
@@ -133,7 +139,10 @@ def displayMinMax(img):
     
     cv2.rectangle(img, (320/2-minWidth/2,240/2-minHeight/2), (320/2+minWidth/2,240/2+minHeight/2), minColour, 2)
     cv2.rectangle(img, (320/2-maxWidth/2,240/2-maxHeight/2), (320/2+maxWidth/2,240/2+maxHeight/2), maxColour, 2)
-    return rotateImage(img)
+    if config["rotate_display"] == 1:
+        return rotateImage(img)
+    else:
+        return img
 
 def increaseMinMax(increment):
     global minWidth
