@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import cv2
 import json
 import time
@@ -5,24 +6,38 @@ import datetime
 import os
 import numpy as np
 
-# configuration file
-config = json.load(open("config.json"))
-# end of configuration file
+# pi specific imports
+from picamera.array import PiRGBArray
+from picamera import PiCamera
+import RPi.GPIO as GPIO
+# end of imports
 
-# window
-cv2.namedWindow("Output")
-# end of window
+# load configuration file
+os.chdir("/home/pi/NatureCam")
+config = json.load(open("config.json"))
+
+cv2.namedWindow("Output", cv2.WND_PROP_FULLSCREEN)
+cv2.setWindowProperty("Output", cv2.WND_PROP_FULLSCREEN, 1)
 
 # camera
-capture = cv2.VideoCapture(0)
-capture.set(3, 320)
-capture.set(4, 240)
-if capture.isOpened():
-    rval, frame = capture.read()
-else:
-    rval = False
+camera = PiCamera()
+camera.resolution = (320,240)
+camera.framerate = 32
+rawCapture = PiRGBArray(camera, size=(320,240))
 time.sleep(config["camera_warmup"])
-# end of camera
+
+# buttons
+btn1 = 17
+btn2 = 22
+btn3 = 23
+btn4 = 27
+btnShutter = btn1
+GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
+GPIO.setup(btn1, GPIO.IN, GPIO.PUD_UP)
+GPIO.setup(btn2, GPIO.IN, GPIO.PUD_UP)
+GPIO.setup(btn3, GPIO.IN, GPIO.PUD_UP)
+GPIO.setup(btn4, GPIO.IN, GPIO.PUD_UP)
 
 isPi = False
 
@@ -155,9 +170,9 @@ def decreaseMinMax(increment):
             maxHeight = 240
 
 # main loop
-while rval:
-    # new frame
-    rval, image = capture.read()
+for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+    # get new frame
+    image = frame.array
     # end of new frame
 
     if mode == 0:
@@ -168,18 +183,22 @@ while rval:
 
     cv2.imshow("Output", image)
 
-    # wait for keys
-    key = cv2.waitKey(10)
-    if key == ord('1'):
+    if GPIO.input(btnShutter) == False:
         mode = not mode
-    if key == ord('2'):
+        time.sleep(0.5)
+    if GPIO.input(btn2) == False:
         isMinActive = not isMinActive
-    if key == ord('3'):
+        time.sleep(0.5)
+    if GPIO.input(btn3) == False:
         decreaseMinMax(5)
-    if key == ord('4'):
+        time.sleep(0.5)
+    if GPIO.input(btn4) == False:
         increaseMinMax(5)
-    if key == 27:
-        break
+        time.sleep(0.5)
+
+    # clear buffer
+    rawCapture.truncate(0)
+    key = cv2.waitKey(10)
     # end of loop
 
 # cleanup
