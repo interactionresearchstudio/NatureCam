@@ -63,6 +63,12 @@ def takePhoto(image):
     filename = filename + ".jpg"
     cv2.imwrite(filename, image)
 
+def rotateImage(img):
+    (h,w) = img.shape[:2]
+    center = (w/2, h/2)
+    M = cv2.getRotationMatrix2D(center, 180, 1.0)
+    return cv2.warpAffine(img, M, (w,h))
+
 def detectChangeContours(img):
     global avg
     global lastPhotoTime
@@ -100,14 +106,14 @@ def detectChangeContours(img):
 
     # otherwise, draw the rectangle
     if time.time() - lastPhotoTime > config['min_photo_interval_s']:
-        takePhoto(img)
+        takePhoto(rotateImage(img))
         numOfPhotos = numOfPhotos + 1
         lastPhotoTime = time.time()
 
     cv2.rectangle(img, (x,y), (x+w, y+h), (0,0,255), 2)
     cv2.putText(img, "%d" % numOfPhotos, (10,20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 2)
 
-    return img
+    return rotateImage(img)
 
 def getLargestContour(contours):
     if not contours:
@@ -127,7 +133,7 @@ def displayMinMax(img):
     
     cv2.rectangle(img, (320/2-minWidth/2,240/2-minHeight/2), (320/2+minWidth/2,240/2+minHeight/2), minColour, 2)
     cv2.rectangle(img, (320/2-maxWidth/2,240/2-maxHeight/2), (320/2+maxWidth/2,240/2+maxHeight/2), maxColour, 2)
-    return img
+    return rotateImage(img)
 
 def increaseMinMax(increment):
     global minWidth
