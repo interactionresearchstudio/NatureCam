@@ -96,7 +96,10 @@ def detectChangeContours(img):
     largestContour = getLargestContour(cnts)
 
     if largestContour is None:
-        return img
+        if config["rotate_display"] == 1:
+            return rotateImage(img)
+        else:
+            return img
 
     (x, y, w, h) = cv2.boundingRect(largestContour)
         
@@ -113,13 +116,13 @@ def detectChangeContours(img):
         numOfPhotos = numOfPhotos + 1
         lastPhotoTime = time.time()
 
+    if config["rotate_display"] == 1:
+        img = rotateImage(img)
+
     cv2.rectangle(img, (x,y), (x+w, y+h), (0,0,255), 2)
     cv2.putText(img, "%d" % numOfPhotos, (10,20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 2)
 
-    if config["rotate_display"] == 1:
-        return rotateImage(img)
-    else:
-        return img
+    return img
 
 def getLargestContour(contours):
     if not contours:
