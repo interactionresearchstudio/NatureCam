@@ -188,13 +188,11 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         time.sleep(0.5)
     if GPIO.input(btn2) == False:
         isMinActive = not isMinActive
-        time.sleep(0.5)
+        time.sleep(0.25)
     if GPIO.input(btn3) == False:
         decreaseMinMax(5)
-        time.sleep(0.5)
     if GPIO.input(btn4) == False:
         increaseMinMax(5)
-        time.sleep(0.5)
 
     # clear buffer
     rawCapture.truncate(0)
